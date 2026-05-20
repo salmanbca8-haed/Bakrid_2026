@@ -377,21 +377,10 @@
 </div>
 
 <script>
-const STORAGE_KEY = 'bakrid_customers_v1';
 
-function load() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  } catch {
-    return [];
-  }
-}
+const API = 'http://localhost:5000';
 
-function save(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-function addCustomer() {
+async function addCustomer() {
 
   const book = document.getElementById('f-book').value.trim();
   const token = document.getElementById('f-token').value.trim();
@@ -404,23 +393,29 @@ function addCustomer() {
 
   if (!book || !token || !name || !phone || !amount) {
     err.style.display = 'block';
+    msg.style.display = 'none';
     return;
   }
 
   err.style.display = 'none';
 
-  const data = load();
+  await fetch(`${API}/customers`, {
 
-  data.push({
-    id: Date.now(),
-    book,
-    token,
-    name,
-    phone,
-    amount: parseFloat(amount)
+    method: 'POST',
+
+    headers: {
+      'Content-Type': 'application/json'
+    },
+
+    body: JSON.stringify({
+      book,
+      token,
+      name,
+      phone,
+      amount: parseFloat(amount)
+    })
+
   });
-
-  save(data);
 
   clearForm();
 
@@ -435,26 +430,39 @@ function addCustomer() {
 }
 
 function clearForm() {
+
   ['f-book','f-token','f-name','f-phone'].forEach(id => {
     document.getElementById(id).value = '';
   });
 
   document.getElementById('f-amount').value = '3500';
+
+  document.getElementById('form-err').style.display = 'none';
 }
 
-function deleteCustomer(id) {
-  const data = load().filter(c => c.id !== id);
-  save(data);
+async function deleteCustomer(id) {
+
+  await fetch(`${API}/customers/${id}`, {
+    method: 'DELETE'
+  });
+
   renderTable();
   updateStats();
 }
 
-function renderTable() {
+async function getCustomers() {
+
+  const res = await fetch(`${API}/customers`);
+
+  return await res.json();
+}
+
+async function renderTable() {
 
   const q = document.getElementById('search-input').value.trim().toLowerCase();
   const by = document.getElementById('search-by').value;
 
-  const all = load();
+  const all = await getCustomers();
 
   let data = [...all].sort((a, b) =>
     a.token.localeCompare(b.token, undefined, {
@@ -464,6 +472,7 @@ function renderTable() {
   );
 
   if (q) {
+
     data = data.filter(c => {
 
       if (by === 'book')
@@ -531,7 +540,10 @@ function renderTable() {
         </td>
 
         <td>
-          <button class="btn-del" onclick="deleteCustomer(${c.id})">
+          <button
+            class="btn-del"
+            onclick="deleteCustomer('${c._id}')"
+          >
             🗑
           </button>
         </td>
@@ -543,9 +555,9 @@ function renderTable() {
   `).join('');
 }
 
-function updateStats() {
+async function updateStats() {
 
-  const data = load();
+  const data = await getCustomers();
 
   document.getElementById('total-count').textContent = data.length;
 
@@ -555,9 +567,20 @@ function updateStats() {
     '₹' + sum.toLocaleString('en-IN');
 }
 
+document.addEventListener('keydown', e => {
+
+  if (
+    e.key === 'Enter' &&
+    ['f-book','f-token','f-name','f-phone','f-amount'].includes(e.target.id)
+  ) {
+    addCustomer();
+  }
+
+});
+
 renderTable();
 updateStats();
-</script>
-</body>
+
+</script></body>
 </html>
 ```
