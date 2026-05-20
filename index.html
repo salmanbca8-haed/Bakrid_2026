@@ -322,7 +322,7 @@
 
       <div class="field">
         <label>Amount Paid (₹) *</label>
-        <input type="number" id="f-amount" placeholder="3500" min="0" />
+        <input type="number" id="f-amount" value="3500" min="0" />
       </div>
 
     </div>
@@ -431,7 +431,6 @@ function addCustomer() {
   renderTable();
   updateStats();
 }
-
 function clearForm() {
   ['f-book','f-token','f-name','f-phone','f-amount'].forEach(id => {
     document.getElementById(id).value = '';
