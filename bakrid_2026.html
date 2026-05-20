@@ -1,0 +1,560 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nagal Nagar Jumma Palli — Bakrid Token Manager</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: #ffffff;
+      border-bottom: 1px solid #e0ddd5;
+      padding: 1.25rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .header-sub {
+      font-size: 13px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      background: #eeeeeb;
+      border: 1px solid #e0ddd5;
+      border-radius: 10px;
+      padding: 10px 20px;
+      min-width: 130px;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a5276;
+    }
+
+    .main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .form-card {
+      background: #ffffff;
+      border: 1px solid #e0ddd5;
+      border-radius: 14px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .form-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #aaa;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .field label {
+      font-size: 12px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .field input {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-size: 14px;
+      background: #fafaf8;
+      outline: none;
+    }
+
+    .field input:focus {
+      border-color: #1a5276;
+      background: #fff;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-add {
+      background: #1a5276;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 22px;
+      cursor: pointer;
+    }
+
+    .btn-clear {
+      background: #fff;
+      color: #888;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 9px 18px;
+      cursor: pointer;
+    }
+
+    .msg-success {
+      font-size: 13px;
+      color: #27ae60;
+      display: none;
+    }
+
+    .msg-error {
+      font-size: 12px;
+      color: #c0392b;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+    }
+
+    .search-wrapper input {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 11px 8px 34px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .search-row select {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      background: #fff;
+    }
+
+    .table-wrap {
+      background: #ffffff;
+      border: 1px solid #e0ddd5;
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f4f4f0;
+      color: #888;
+      font-size: 11px;
+      padding: 11px 14px;
+      text-align: left;
+      border-bottom: 1px solid #e0ddd5;
+    }
+
+    td {
+      padding: 11px 14px;
+      border-bottom: 1px solid #f0ede6;
+    }
+
+    .badge-token {
+      background: #d6eaf8;
+      color: #1a5276;
+      border-radius: 5px;
+      padding: 3px 9px;
+      font-size: 12px;
+    }
+
+    .badge-serial {
+      background: #f0ede6;
+      color: #666;
+      border-radius: 5px;
+      padding: 3px 9px;
+      font-size: 12px;
+    }
+
+    .amount-cell {
+      font-weight: 600;
+      color: #1a5276;
+    }
+
+    .btn-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #c0392b;
+    }
+
+    .book-row {
+      background: #f4f4f0;
+      font-weight: 600;
+      color: #1a5276;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">🕌 <b>Nagal Nagar Jumma Palli</b></div>
+    <div class="header-sub">Bakrid Token Management System</div>
+    <h4>Designed by Salman</h4>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Total Customers</div>
+      <div class="stat-value" id="total-count">0</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Total Collection</div>
+      <div class="stat-value" id="total-amount">₹0</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="form-card">
+    <div class="form-title">Add New Customer</div>
+
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Book Number *</label>
+        <input type="text" id="f-book" placeholder="e.g. Book 1" />
+      </div>
+
+      <div class="field">
+        <label>Token Number *</label>
+        <input type="text" id="f-token" placeholder="e.g. T-001" />
+      </div>
+
+      <div class="field">
+        <label>Customer Name *</label>
+        <input type="text" id="f-name" placeholder="Full name" />
+      </div>
+
+      <div class="field">
+        <label>Phone Number *</label>
+        <input type="tel" id="f-phone" placeholder="10-digit number" />
+      </div>
+
+      <div class="field">
+        <label>Amount Paid (₹) *</label>
+        <input type="number" id="f-amount" placeholder="3500" min="0" />
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-add" onclick="addCustomer()">+ Add Customer</button>
+      <button class="btn-clear" onclick="clearForm()">Clear</button>
+      <span class="msg-success" id="add-msg">✓ Customer added successfully!</span>
+    </div>
+
+    <div class="msg-error" id="form-err">⚠ Please fill in all fields before adding.</div>
+  </div>
+
+  <div class="search-row">
+
+    <div class="search-wrapper">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Search..." oninput="renderTable()" />
+    </div>
+
+    <select id="search-by" onchange="renderTable()">
+      <option value="all">All Fields</option>
+      <option value="book">Book Number</option>
+      <option value="token">Token Number</option>
+      <option value="name">Customer Name</option>
+      <option value="phone">Phone Number</option>
+    </select>
+
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Serial No.</th>
+            <th>Book No.</th>
+            <th>Token No.</th>
+            <th>Customer Name</th>
+            <th>Phone Number</th>
+            <th>Amount Paid</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'bakrid_customers_v1';
+
+function load() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function save(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function addCustomer() {
+
+  const book = document.getElementById('f-book').value.trim();
+  const token = document.getElementById('f-token').value.trim();
+  const name = document.getElementById('f-name').value.trim();
+  const phone = document.getElementById('f-phone').value.trim();
+  const amount = document.getElementById('f-amount').value.trim();
+
+  const err = document.getElementById('form-err');
+  const msg = document.getElementById('add-msg');
+
+  if (!book || !token || !name || !phone || !amount) {
+    err.style.display = 'block';
+    return;
+  }
+
+  err.style.display = 'none';
+
+  const data = load();
+
+  data.push({
+    id: Date.now(),
+    book,
+    token,
+    name,
+    phone,
+    amount: parseFloat(amount)
+  });
+
+  save(data);
+
+  clearForm();
+
+  msg.style.display = 'inline';
+
+  setTimeout(() => {
+    msg.style.display = 'none';
+  }, 2000);
+
+  renderTable();
+  updateStats();
+}
+
+function clearForm() {
+  ['f-book','f-token','f-name','f-phone','f-amount'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+}
+
+function deleteCustomer(id) {
+  const data = load().filter(c => c.id !== id);
+  save(data);
+  renderTable();
+  updateStats();
+}
+
+function renderTable() {
+
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+  const by = document.getElementById('search-by').value;
+
+  const all = load();
+
+  let data = [...all].sort((a, b) =>
+    a.token.localeCompare(b.token, undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    })
+  );
+
+  if (q) {
+    data = data.filter(c => {
+
+      if (by === 'book')
+        return c.book.toLowerCase().includes(q);
+
+      if (by === 'token')
+        return c.token.toLowerCase().includes(q);
+
+      if (by === 'name')
+        return c.name.toLowerCase().includes(q);
+
+      if (by === 'phone')
+        return c.phone.includes(q);
+
+      return (
+        c.book.toLowerCase().includes(q) ||
+        c.token.toLowerCase().includes(q) ||
+        c.name.toLowerCase().includes(q) ||
+        c.phone.includes(q)
+      );
+    });
+  }
+
+  const tbody = document.getElementById('table-body');
+
+  const grouped = {};
+
+  data.forEach(c => {
+    if (!grouped[c.book]) grouped[c.book] = [];
+    grouped[c.book].push(c);
+  });
+
+  let serial = 1;
+
+  tbody.innerHTML = Object.keys(grouped).map(book => `
+
+    <tr class="book-row">
+      <td colspan="7"> BOOK ${book}</td>
+    </tr>
+
+    ${grouped[book].map(c => `
+
+      <tr>
+
+        <td>
+          <span class="badge-serial">
+            S-${String(serial++).padStart(3, '0')}
+          </span>
+        </td>
+
+        <td>
+          <span class="badge-serial">${c.book}</span>
+        </td>
+
+        <td>
+          <span class="badge-token">${c.token}</span>
+        </td>
+
+        <td>${c.name}</td>
+
+        <td>${c.phone}</td>
+
+        <td class="amount-cell">
+          ₹${Number(c.amount).toLocaleString('en-IN')}
+        </td>
+
+        <td>
+          <button class="btn-del" onclick="deleteCustomer(${c.id})">
+            🗑
+          </button>
+        </td>
+
+      </tr>
+
+    `).join('')}
+
+  `).join('');
+}
+
+function updateStats() {
+
+  const data = load();
+
+  document.getElementById('total-count').textContent = data.length;
+
+  const sum = data.reduce((a, c) => a + c.amount, 0);
+
+  document.getElementById('total-amount').textContent =
+    '₹' + sum.toLocaleString('en-IN');
+}
+
+renderTable();
+updateStats();
+</script>
+</body>
+</html>
+```
