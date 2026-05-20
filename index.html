@@ -1,13 +1,12 @@
+# Full Updated Version — Bakrid Token Manager With Book Sections
 
-
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Nagal Nagar Jumma Palli — Bakrid Token Manager</title>
-  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -52,7 +51,7 @@
     }
 
     .stat-card {
-      background: #eeeeeb;
+      background: #f4f4f0;
       border: 1px solid #e0ddd5;
       border-radius: 10px;
       padding: 10px 20px;
@@ -61,7 +60,7 @@
     }
 
     .stat-label {
-      font-size: 12px;
+      font-size: 11px;
       color: #888;
       text-transform: uppercase;
       margin-bottom: 4px;
@@ -277,9 +276,8 @@
 
 <div class="header">
   <div>
-    <div class="header-title">🕌 <b>Nagal Nagar Jumma Palli</b></div>
+    <div class="header-title">🕌 Nagal Nagar Jumma Palli</div>
     <div class="header-sub">Bakrid Token Management System</div>
-    <h4>Designed by Salman</h4>
   </div>
 
   <div class="stats">
@@ -324,7 +322,7 @@
 
       <div class="field">
         <label>Amount Paid (₹) *</label>
-        <input type="number" id="f-amount" placeholder="3500" value="3500" min="0" />
+        <input type="number" id="f-amount" placeholder="3500" min="0" />
       </div>
 
     </div>
@@ -377,10 +375,21 @@
 </div>
 
 <script>
+const STORAGE_KEY = 'bakrid_customers_v1';
 
-const API = 'http://localhost:5000';
+function load() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
 
-async function addCustomer() {
+function save(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function addCustomer() {
 
   const book = document.getElementById('f-book').value.trim();
   const token = document.getElementById('f-token').value.trim();
@@ -393,29 +402,23 @@ async function addCustomer() {
 
   if (!book || !token || !name || !phone || !amount) {
     err.style.display = 'block';
-    msg.style.display = 'none';
     return;
   }
 
   err.style.display = 'none';
 
-  await fetch(`${API}/customers`, {
+  const data = load();
 
-    method: 'POST',
-
-    headers: {
-      'Content-Type': 'application/json'
-    },
-
-    body: JSON.stringify({
-      book,
-      token,
-      name,
-      phone,
-      amount: parseFloat(amount)
-    })
-
+  data.push({
+    id: Date.now(),
+    book,
+    token,
+    name,
+    phone,
+    amount: parseFloat(amount)
   });
+
+  save(data);
 
   clearForm();
 
@@ -430,39 +433,24 @@ async function addCustomer() {
 }
 
 function clearForm() {
-
-  ['f-book','f-token','f-name','f-phone'].forEach(id => {
+  ['f-book','f-token','f-name','f-phone','f-amount'].forEach(id => {
     document.getElementById(id).value = '';
   });
-
-  document.getElementById('f-amount').value = '3500';
-
-  document.getElementById('form-err').style.display = 'none';
 }
 
-async function deleteCustomer(id) {
-
-  await fetch(`${API}/customers/${id}`, {
-    method: 'DELETE'
-  });
-
+function deleteCustomer(id) {
+  const data = load().filter(c => c.id !== id);
+  save(data);
   renderTable();
   updateStats();
 }
 
-async function getCustomers() {
-
-  const res = await fetch(`${API}/customers`);
-
-  return await res.json();
-}
-
-async function renderTable() {
+function renderTable() {
 
   const q = document.getElementById('search-input').value.trim().toLowerCase();
   const by = document.getElementById('search-by').value;
 
-  const all = await getCustomers();
+  const all = load();
 
   let data = [...all].sort((a, b) =>
     a.token.localeCompare(b.token, undefined, {
@@ -472,7 +460,6 @@ async function renderTable() {
   );
 
   if (q) {
-
     data = data.filter(c => {
 
       if (by === 'book')
@@ -510,7 +497,7 @@ async function renderTable() {
   tbody.innerHTML = Object.keys(grouped).map(book => `
 
     <tr class="book-row">
-      <td colspan="7"> BOOK ${book}</td>
+      <td colspan="7">📘 ${book}</td>
     </tr>
 
     ${grouped[book].map(c => `
@@ -540,10 +527,7 @@ async function renderTable() {
         </td>
 
         <td>
-          <button
-            class="btn-del"
-            onclick="deleteCustomer('${c._id}')"
-          >
+          <button class="btn-del" onclick="deleteCustomer(${c.id})">
             🗑
           </button>
         </td>
@@ -555,9 +539,9 @@ async function renderTable() {
   `).join('');
 }
 
-async function updateStats() {
+function updateStats() {
 
-  const data = await getCustomers();
+  const data = load();
 
   document.getElementById('total-count').textContent = data.length;
 
@@ -567,20 +551,9 @@ async function updateStats() {
     '₹' + sum.toLocaleString('en-IN');
 }
 
-document.addEventListener('keydown', e => {
-
-  if (
-    e.key === 'Enter' &&
-    ['f-book','f-token','f-name','f-phone','f-amount'].includes(e.target.id)
-  ) {
-    addCustomer();
-  }
-
-});
-
 renderTable();
 updateStats();
-
-</script></body>
+</script>
+</body>
 </html>
 ```
